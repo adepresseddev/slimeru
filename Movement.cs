@@ -7,6 +7,8 @@ public class Movement : MonoBehaviour
 
     //Variavel para armazenar o RigidBody2d do personagem
     private Rigidbody2D playerRb;
+    //Variavel para armazenar o Animator do personagem
+    private Animator playerAnimator;
 
     //Variavel para determinar a velocidade do personagem
     public float speed;
@@ -15,6 +17,8 @@ public class Movement : MonoBehaviour
 
     //Variavel para saber se o personagem está olhando para esquerda ou direita
     public bool isLookLeft;
+    //Variavel para saber se o personagem pode dar o double jump
+    public bool doubleJump;
 
     //Armazena o objeto que vai ser utilizado para fazer a verificação se o personagem está no chão
     public Transform groundCheck;
@@ -29,8 +33,10 @@ public class Movement : MonoBehaviour
     private void Start()
         {
 
-            //Pega o Rigidbody2D do personagem e armazena na variavel
+            //Pega o Rigidbody2D do personagem e armazena na variavel playerRb
             playerRb = GetComponent<Rigidbody2D>();
+            //Pega o Animator do personagem e armazena na variavel playerAnimator
+            playerAnimator = GetComponent<Animator>();
 
         }
 
@@ -56,16 +62,37 @@ public class Movement : MonoBehaviour
         //Armazena a posição vertical do personagem
         float speedY = playerRb.velocity.y;
 
-        //if para fazer o personagem pular
-        if(Input.GetButtonDown("Jump") && isGrounded == true && isCeiled == false)
+        //if para fazer o personagem pular e faz ele poder dar o doublejump
+        if(Input.GetButtonDown("Jump") )
         {
 
-            playerRb.AddForce(new Vector2(0, jumpForce));
+            if (isGrounded)
+            {
+
+                if (!isCeiled)
+                {
+
+                    DoJump();
+                    doubleJump = true;
+
+                } 
+
+            }
+            else if (!isGrounded && doubleJump)
+            {
+
+                DoJump();
+                doubleJump = false;
+
+            }
 
         }
 
         //Faz o personagem andar
         playerRb.velocity = new Vector2(h * speed, speedY);
+
+        //Determina o parametro h do animator para receber o valor da variavel h
+        playerAnimator.SetInteger("h", (int)h);
 
     }
 
@@ -85,6 +112,14 @@ public class Movement : MonoBehaviour
         isLookLeft = !isLookLeft;
 
         transform.Rotate(0f, 180f, 0f);
+
+    }
+
+    //Código para fazer ele pular
+    void DoJump()
+    {
+
+        playerRb.AddForce(new Vector2(0, jumpForce));
 
     }
 
